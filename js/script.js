@@ -35,3 +35,20 @@ document.addEventListener('DOMContentLoaded', function(){
   },false);
 
 },false);
+
+
+function rgbaToPQI(rgba, np, nq){
+  var intensities = [];
+  for (var i=0; i<rgba.length(); i=i+4){
+    thisrgb = rgba.slice(i, i+3)
+    intensity = (thisrgb[0] + thisrgb[1] + thisrgb[2]) / 3.0;
+    intensities.push(intensity)
+  }
+
+  pqintensities = []
+  for (var i=0; i<intensities.length(); i=i+nq){
+    pqintensities.push(intensities.slice(i, i+nq))
+  }
+
+  return pqintensities
+}
