@@ -1,6 +1,7 @@
-var nlights = 1;
+var nlights = 20;
 var imgres = [500, 375];
 
+var socket = io("http://192.168.1.216:3000");
 
 var video = document.querySelector("#videoElement");
 
@@ -37,12 +38,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var that = this;
       setTimeout(function(){
         draw(that,context,cw,ch);
-        var lightonrgba = getImgRGBA(imgres[0], imgres[1]);
-        console.log("Shift!")
-        setTimeout(function(){
-            draw(that,context,cw,ch);
-            calibrate(nlights, imgres, lightonrgba);
-        }, 2000)
+        calibrate(nlights, imgres);
       }, 2000)
 
   },false);
@@ -80,7 +76,7 @@ function rgbaToPQI(rgba, np, nq){
 }
 
 
-function calibrate(nlights, imgres, lightonrgba){
+function calibrate(nlights, imgres){
   var white = "#ffffff", black = "#000000";
   var lighton = [white]; for (var i=0; i < (nlights-1); i++){lighton.push(black)};
   var lightoff = []; for (var i=0; i < (nlights); i++){lighton.push(black)};
@@ -89,11 +85,12 @@ function calibrate(nlights, imgres, lightonrgba){
   var minx = 100000000000, miny = 100000000000, maxx = 0, maxy = 0;
 
   for (var n=0; n<nlights; n++){
-    // console.log(".");
-    // requests.post(lighton)
-    //lightonrgba = getImgRGBA(imgres[0], imgres[1]);
+    console.log(".");
 
-    // requests.post(lightsoff)
+    socket.emit("data", lighton)
+    lightonrgba = getImgRGBA(imgres[0], imgres[1]);
+
+    socket.emit("data", lightoff)
     lightoffrgba = getImgRGBA(imgres[0], imgres[1]);
 
     maxdiff = 0;
