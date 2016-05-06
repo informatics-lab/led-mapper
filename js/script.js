@@ -1,4 +1,4 @@
-var nlights = 20;
+var nlights = 50;
 var imgres = [500, 375];
 
 var socket = io("http://192.168.1.216:3000");
@@ -79,44 +79,64 @@ function rgbaToPQI(rgba, np, nq){
 function calibrate(nlights, imgres){
   var white = "#ffffff", black = "#000000";
   var lighton = [white]; for (var i=0; i < (nlights-1); i++){lighton.push(black)};
-  var lightoff = []; for (var i=0; i < (nlights); i++){lighton.push(black)};
+  var lightoff = []; for (var i=0; i < (nlights); i++){lightoff.push(black)};
   var positions = [];
 
   var minx = 100000000000, miny = 100000000000, maxx = 0, maxy = 0;
 
-  for (var n=0; n<nlights; n++){
-    console.log(".");
+  function lightup() {
+    function lightdown() {
+      setTimeout(function() {
 
-    socket.emit("data", lighton)
-    lightonrgba = getImgRGBA(imgres[0], imgres[1]);
+        socket.emit("data", lightoff);
+        console.log(lightoff);
+        lightoffrgba = getImgRGBA(imgres[0], imgres[1]);
+        console.log("off", lightoffrgba);
 
-    socket.emit("data", lightoff)
-    lightoffrgba = getImgRGBA(imgres[0], imgres[1]);
+        maxdiff = 0;
+        maxpos = 0;
+        for (var i=0; i<lightonrgba.length; i+=4){
+          var onlum = (0.21*lightonrgba[i]) + (lightonrgba[i+1]*0.71) + (lightonrgba[i+2]*0.07)
+          var offlum = (0.21*lightoffrgba[i]) + (lightoffrgba[i+1]*0.71) + (lightoffrgba[i+2]*0.07)
+          var diff = onlum - offlum;
+          if (diff > maxdiff) {maxdiff=diff; maxpos=i/4;}
+        }
 
-    maxdiff = 0;
-    maxpos = 0;
-    for (var i=0; i<lightonrgba.length; i+=4){
-      var onlum = (0.21*lightonrgba[i]) + (lightonrgba[i+1]*0.71) + (lightonrgba[i+2]*0.07)
-      var offlum = (0.21*lightoffrgba[i]) + (lightoffrgba[i+1]*0.71) + (lightoffrgba[i+2]*0.07)
-      var diff = onlum - offlum;
-      if (diff > maxdiff) {maxdiff=diff; maxpos=i/4;}
+        var p = maxpos%imgres[0];
+        var q = Math.floor(maxpos/imgres[0]);
+
+        if (p > maxx){maxx = p;}
+        if (p < minx){minx = p;}
+        if (q > maxy){maxy = q;}
+        if (q < miny){miny = q;}
+        positions.push([p,q])
+        
+        console.log(positions)
+        drawRect(p,q);
+
+        lighton.unshift(black)
+        lighton.pop()
+        if (n < nlights) {
+          n++;
+          // lightup();
+          setTimeout(lightup, 1000);
+        }
+      }, 1000);
     }
 
-    var p = maxpos%imgres[0];
-    var q = Math.floor(maxpos/imgres[0]);
+    console.log(".");
+    console.log(lighton);
+    socket.emit("data", lighton)
+    lightonrgba = getImgRGBA(imgres[0], imgres[1]);
+    console.log("on", lightonrgba);
 
-    if (p > maxx){maxx = p;}
-    if (p < minx){minx = p;}
-    if (q > maxy){maxy = q;}
-    if (q < miny){miny = q;}
-    positions.push([p,q])
-    
-    console.log(positions)
-    drawRect(p,q);
-
-    lighton.unshift(black)
-    lighton.pop()
+    setTimeout(function() {
+      lightdown();
+    }, 1000)
   }
+
+  var n = 0;
+  lightup();
 
   console.log(positions)
 
