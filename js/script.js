@@ -47,8 +47,12 @@ document.addEventListener('DOMContentLoaded', function(){
 
 function getImgRGBA(np, nq){
   var canvas = document.getElementById('canvasElement');
+  var video = document.getElementById('videoElement');
   var context = canvas.getContext('2d');
-
+  var cw = Math.floor(canvas.clientWidth);
+  var ch = Math.floor(canvas.clientHeight);
+  draw(video, context, cw, ch);
+  var context = canvas.getContext('2d');
   return context.getImageData(0, 0, np, nq).data;
 }
 
@@ -89,16 +93,14 @@ function calibrate(nlights, imgres){
       setTimeout(function() {
 
         socket.emit("data", lightoff);
-        console.log(lightoff);
         lightoffrgba = getImgRGBA(imgres[0], imgres[1]);
-        console.log("off", lightoffrgba);
 
         maxdiff = 0;
         maxpos = 0;
         for (var i=0; i<lightonrgba.length; i+=4){
           var onlum = (0.21*lightonrgba[i]) + (lightonrgba[i+1]*0.71) + (lightonrgba[i+2]*0.07)
           var offlum = (0.21*lightoffrgba[i]) + (lightoffrgba[i+1]*0.71) + (lightoffrgba[i+2]*0.07)
-          var diff = onlum - offlum;
+          var diff = Math.abs(onlum - offlum);
           if (diff > maxdiff) {maxdiff=diff; maxpos=i/4;}
         }
 
@@ -111,7 +113,7 @@ function calibrate(nlights, imgres){
         if (q < miny){miny = q;}
         positions.push([p,q])
         
-        console.log(positions)
+        console.log(p + ',' + q);
         drawRect(p,q);
 
         lighton.unshift(black)
@@ -125,10 +127,8 @@ function calibrate(nlights, imgres){
     }
 
     console.log(".");
-    console.log(lighton);
     socket.emit("data", lighton)
     lightonrgba = getImgRGBA(imgres[0], imgres[1]);
-    console.log("on", lightonrgba);
 
     setTimeout(function() {
       lightdown();
