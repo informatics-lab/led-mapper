@@ -4,7 +4,7 @@ A browser application which uses the webcam of your device to map LED positions.
 
 The Browser expects to be able to send commands through a websocket to turn on a series of LEDs one at a time. It takes a photo before and after turning the light on using a webcam and compares the two frames to calculate the x & y position within the camera frame.
 
-![LED Rhino being mapped](https://s3-eu-west-1.amazonaws.com/informatics-webimages/projects/rhino/rhino-mapping.gif)
+![LED Rhino being mapped](https://s3-eu-west-1.amazonaws.com/informatics-webimages/projects/rhino/rhino-mapping-smaller.gif)
 
 ## Installation
 
