@@ -6,6 +6,8 @@ The Browser expects to be able to send commands through a websocket to turn on a
 
 ![LED Rhino being mapped](https://s3-eu-west-1.amazonaws.com/informatics-webimages/projects/rhino/rhino-mapping-smaller.gif)
 
+The left hand image shows the camera feed and the right hand image shows the position of the LED marked with a red square.
+
 ## Installation
 
 Clone the repo
