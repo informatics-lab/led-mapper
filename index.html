@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Display Webcam Stream</title>
+  <head>
 
-<link rel="stylesheet" type="text/css" href="css/style.css" />
-</head>
+    <title>Display Webcam Stream</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
 
-<body>
-<div id="container">
+  </head>
+  <body>
 
-    <video autoplay="true" id="videoElement"></video>
-    <canvas id="canvasElement"></canvas>
-    
-</div>
+    <div id="container">
+      <video autoplay="true" id="videoElement"></video>
+      <canvas id="canvasElement"></canvas>
+    </div>
 
-<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+    <footer class="site-footer">
+      <div id="metric">Loading...</div>
+      <div id="loading"></div>
+    </footer>
 
+    <script src="js/socket.io-1.4.5.js"></script>
     <script src="js/script.js"></script>
-</body>
+
+  </body>
 </html>

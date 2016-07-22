@@ -1,7 +1,10 @@
-var nlights = 50;
+var nlights = 1002;
+var startlight = 0;
 var imgres = [500, 375];
+var wait = 100;
+var threshold = 90;
 
-var socket = io("http://192.168.1.216:3000");
+var socket = io("http://172.24.1.1:3000");
 
 var video = document.querySelector("#videoElement");
 
@@ -82,8 +85,8 @@ function rgbaToPQI(rgba, np, nq){
 
 function calibrate(nlights, imgres){
   var white = "#ffffff", black = "#000000";
-  var lighton = [white]; for (var i=0; i < (nlights-1); i++){lighton.push(black)};
-  var lightoff = []; for (var i=0; i < (nlights); i++){lightoff.push(black)};
+  var lighton = [white]; for (var i=startlight; i < (nlights-1); i++){lighton.push(black)};
+  var lightoff = []; for (var i=startlight; i < (nlights); i++){lightoff.push(black)};
   var positions = [];
 
   var minx = 100000000000, miny = 100000000000, maxx = 0, maxy = 0;
@@ -111,9 +114,20 @@ function calibrate(nlights, imgres){
         if (p < minx){minx = p;}
         if (q > maxy){maxy = q;}
         if (q < miny){miny = q;}
+        if (maxdiff < threshold) {
+          p = 0;
+          q = 0;
+        }
+
         positions.push([p,q])
-        
-        console.log(p + ',' + q);
+
+        // console.log(p + ',' + q + ' - ' + maxdiff);
+        var percent = n / nlights * 100 + '%'
+        document.getElementById('metric').innerHTML = 'Light ' + n + ' - ' + p + ',' + q + ' - ' + percent
+        if (n == nlights) {
+          document.getElementById("loading").style.border = "2px solid green";
+        }
+        document.getElementById("loading").style.width = percent
         drawRect(p,q);
 
         lighton.unshift(black)
@@ -121,18 +135,18 @@ function calibrate(nlights, imgres){
         if (n < nlights) {
           n++;
           // lightup();
-          setTimeout(lightup, 1000);
+          setTimeout(lightup, wait);
         }
-      }, 1000);
+      }, wait);
     }
 
-    console.log(".");
+    // console.log(".");
     socket.emit("data", lighton)
     lightonrgba = getImgRGBA(imgres[0], imgres[1]);
 
     setTimeout(function() {
       lightdown();
-    }, 1000)
+    }, wait)
   }
 
   var n = 0;
